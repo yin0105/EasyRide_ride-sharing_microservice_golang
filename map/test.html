@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+   
+   <head>
+      <script src = "https://maps.googleapis.com/maps/api/js?v=3.42&key=AIzaSyBoY4Yn60USF1fDNIm65QVpRBowNeBBgbA&libraries=places"></script>
+      
+      
+      
+   </head>
+   
+   <body>
+      <div id = "sample" style = "width:580px; height:400px;"></div>
+   </body>
+
+   <script>
+         
+
+      // function loadMap() {
+      
+         var mapOptions = {
+            center:new google.maps.LatLng(17.377631, 78.478603),
+            zoom:5
+         }
+         
+         var map = new google.maps.Map(document.getElementById("sample"),mapOptions);
+         
+         var marker = new google.maps.Marker({
+            position: new google.maps.LatLng(17.377631, 78.478603),
+            map: map,
+            animation:google.maps.Animation.Drop
+         });
+      // }
+
+      google.maps.event.addListener(map, 'click', function(event) {
+         placeMarker(event.latLng);
+      });
+
+      function placeMarker(location) {
+         console.log("place marker: " + location);
+         var marker = new google.maps.Marker({
+            position: location,
+            map: map
+         });
+      }
+   </script>
+   
+</html>
