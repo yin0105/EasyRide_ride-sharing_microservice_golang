@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -45,60 +44,32 @@ type HttpRes struct {
 	Status            string        `json:"status"`
 }
 
-func handleAddDriver(w http.ResponseWriter, r *http.Request) {
-	uri := r.URL.Path
-	ss := strings.Split(uri, "/")
-	for i, s := range ss {
-		fmt.Println(i, s)
-	}
-	if len(ss) < 8 {
-		http.Error(w, fmt.Sprintf("Wrong Parameters"), http.StatusBadRequest)
-		return
-	}
-	user := ss[5]
-	pwd := ss[6]
-	rate := ss[7]
-
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/easy_ride")
-
-	// if there is an error opening the connection, handle it
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to connect into MySQL database."), http.StatusBadRequest)
-		panic(err.Error())
-		return
-	}
-
-	// defer the close till after the main function has finished executing
-	defer db.Close()
-
-	// perform a db.Query insert
-	insert, err := db.Query("INSERT INTO roster (user, pwd, rate) VALUES ( '" + user + "', '" + pwd + "', " + rate + " )")
-
-	// if there is an error inserting, handle it
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to join a driver."), http.StatusBadRequest)
-		panic(err.Error())
-		return
-	}
-	// be careful deferring Queries if you are using transactions
-	defer insert.Close()
-	encoder := json.NewEncoder(w)
-	encoder.Encode("OK")
+type MapRes struct {
+	Distance     string `json:"distance"`
+	PercentARoad string `json:"percent_a_road"`
 }
 
 func handleMapping(w http.ResponseWriter, r *http.Request) {
+	var mapRes MapRes
+	mapRes.PercentARoad = "0"
+	mapRes.Distance = "0"
 	fmt.Println("Starting Mapping Microservice...")
-	uri := r.URL.Path
+	uri := strings.Split(r.URL.Path, "/api/v1/mapping/")
+	fmt.Println(uri[1])
 	// response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=137.750543040919084,%20122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
-	response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&origin=37.75434337954133,%20-122.4837655029297&destination=37.750543040919084,%20-122.41853417968751")
+	response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&" + uri[1]) //origin=37.75434337954133,%20-122.4837655029297&destination=37.750543040919084,%20-122.41853417968751")
+	fmt.Println("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&" + uri[1])
 	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
+		http.Error(w, fmt.Sprintf("The HTTP request failed with error %s\n", err), http.StatusBadRequest)
+		return
+		// fmt.Printf("The HTTP request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		// fmt.Println(string(data))
-
+		fmt.Println("data = " + string(data))
 		var result map[string]interface{}
 		json.Unmarshal([]byte(data), &result)
+
+		fmt.Println(result)
 
 		var result2 HttpRes
 		json.Unmarshal(data, &result2)
@@ -117,9 +88,14 @@ func handleMapping(w http.ResponseWriter, r *http.Request) {
 				} else if unit == "ft" {
 					s *= 0.0003048
 				}
-				fmt.Println(s) // 3.1415927410125732
+				fmt.Println(s)
+				mapRes.Distance = fmt.Sprintf("%.4f", s)
+
 			}
 		}
+
+		encoder := json.NewEncoder(w)
+		encoder.Encode(&mapRes)
 
 	}
 }
