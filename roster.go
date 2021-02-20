@@ -85,14 +85,14 @@ func handleChangeDriver(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if results.Next() {
-		var cur_pwd string
+		var curPwd string
 		// for each row, scan the result into our tag composite object
-		err = results.Scan(&cur_pwd)
+		err = results.Scan(&curPwd)
 		if err != nil {
 			panic(err.Error()) // proper error handling instead of panic in your app
 		}
 		// and then print out the tag's Name attribute
-		if cur_pwd != pwd {
+		if curPwd != pwd {
 			http.Error(w, fmt.Sprintf("Wrong password"), http.StatusBadRequest)
 			return
 		}
@@ -149,14 +149,14 @@ func handleRemoveDriver(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if results.Next() {
-		var cur_pwd string
+		var curPwd string
 		// for each row, scan the result into our tag composite object
-		err = results.Scan(&cur_pwd)
+		err = results.Scan(&curPwd)
 		if err != nil {
 			panic(err.Error()) // proper error handling instead of panic in your app
 		}
 		// and then print out the tag's Name attribute
-		if cur_pwd != pwd {
+		if curPwd != pwd {
 			http.Error(w, fmt.Sprintf("Wrong password"), http.StatusBadRequest)
 			return
 		}
