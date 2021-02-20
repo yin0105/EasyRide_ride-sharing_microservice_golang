@@ -1,14 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	"strings"
-)
-
 type Distance struct {
 	Text  string `json:"text"`
 	Value string `json:"value"`
@@ -44,37 +35,37 @@ type HttpRes struct {
 	Status            string        `json:"status"`
 }
 
-func main() {
-	fmt.Println("Starting the application...")
-	// response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=137.750543040919084,%20122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
-	response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=37.750543040919084,%20-122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
-	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		// fmt.Println(string(data))
+// func handleMapping() {
+// 	fmt.Println("Starting the application...")
+// 	// response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=137.750543040919084,%20122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
+// 	response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=37.750543040919084,%20-122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
+// 	if err != nil {
+// 		fmt.Printf("The HTTP request failed with error %s\n", err)
+// 	} else {
+// 		data, _ := ioutil.ReadAll(response.Body)
+// 		// fmt.Println(string(data))
 
-		var result map[string]interface{}
-		json.Unmarshal([]byte(data), &result)
+// 		var result map[string]interface{}
+// 		json.Unmarshal([]byte(data), &result)
 
-		var result2 HttpRes
-		json.Unmarshal(data, &result2)
-		if len(result2.Routes) == 0 {
-			fmt.Println("Routes == nil")
-		} else {
-			d := result2.Routes[0].Legs[0].Distance.Text
-			d = strings.TrimSpace(d)
-			unit := string(d[len(d)-2:])
-			d = strings.TrimSpace(d[:len(d)-2])
-			fmt.Println(unit)
-			fmt.Println(d)
-			if s, err := strconv.ParseFloat(d, 32); err == nil {
-				if unit == "mi" {
-					s *= 1.609
-				}
-				fmt.Println(s) // 3.1415927410125732
-			}
-		}
+// 		var result2 HttpRes
+// 		json.Unmarshal(data, &result2)
+// 		if len(result2.Routes) == 0 {
+// 			fmt.Println("Routes == nil")
+// 		} else {
+// 			d := result2.Routes[0].Legs[0].Distance.Text
+// 			d = strings.TrimSpace(d)
+// 			unit := string(d[len(d)-2:])
+// 			d = strings.TrimSpace(d[:len(d)-2])
+// 			fmt.Println(unit)
+// 			fmt.Println(d)
+// 			if s, err := strconv.ParseFloat(d, 32); err == nil {
+// 				if unit == "mi" {
+// 					s *= 1.609
+// 				}
+// 				fmt.Println(s) // 3.1415927410125732
+// 			}
+// 		}
 
-	}
-}
+// 	}
+// }
