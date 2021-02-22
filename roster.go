@@ -16,6 +16,11 @@ type Driver struct {
 	Rate float32 `json:"rate"`
 }
 
+type DriverInfo struct {
+	DriverCount string `json:"driver_count"`
+	Rate        string `json:"rate"`
+}
+
 func handleAddDriver(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	ss := strings.Split(uri, "/")
@@ -218,30 +223,39 @@ func handleDisplayDrivers(w http.ResponseWriter, r *http.Request) {
 	encoder.Encode(&drivers)
 }
 
-func init() {
-	// Open up our database connection.
-	// db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/easy_ride")
+func handleGetInfo(w http.ResponseWriter, r *http.Request) {
+	uri := r.URL.Path
+	ss := strings.Split(uri, "/")
+	for i, s := range ss {
+		fmt.Println(i, s)
+	}
 
-	// // if there is an error opening the connection, handle it
-	// if err != nil {
-	// 	log.Print(err.Error())
-	// }
-	// defer db.Close()
+	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/easy_ride")
 
-	// Execute the query
-	// results, err := db.Query("SELECT id, name FROM tags")
-	// if err != nil {
-	// 	panic(err.Error()) // proper error handling instead of panic in your app
-	// }
+	// if there is an error opening the connection, handle it
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to connect into MySQL database."), http.StatusBadRequest)
+		panic(err.Error())
+	}
 
-	// for results.Next() {
-	// 	var tag Tag
-	// 	// for each row, scan the result into our tag composite object
-	// 	err = results.Scan(&tag.ID, &tag.Name)
-	// 	if err != nil {
-	// 		panic(err.Error()) // proper error handling instead of panic in your app
-	// 	}
-	// 	// and then print out the tag's Name attribute
-	// 	log.Printf(tag.Name)
-	// }
+	// defer the close till after the main function has finished executing
+	defer db.Close()
+
+	results, err := db.Query("SELECT COUNT(id), MIN(rate) FROM roster")
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	if results.Next() {
+		var driverInfo DriverInfo
+		// for each row, scan the result into our tag composite object
+		err = results.Scan(&driverInfo.DriverCount, &driverInfo.Rate)
+		if err != nil {
+			panic(err.Error()) // proper error handling instead of panic in your app
+		}
+		// and then print out the tag's Name attribute
+		encoder := json.NewEncoder(w)
+		encoder.Encode(&driverInfo)
+	}
+
 }

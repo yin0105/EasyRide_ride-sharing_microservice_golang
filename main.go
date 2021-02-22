@@ -27,9 +27,11 @@ func main() {
 	http.HandleFunc("/api/v1/driver/add/", handleAddDriver)
 	http.HandleFunc("/api/v1/driver/change/", handleChangeDriver)
 	http.HandleFunc("/api/v1/driver/remove/", handleRemoveDriver)
+	http.HandleFunc("/api/v1/driver/get_info/", handleGetInfo)
 	http.HandleFunc("/api/v1/drivers", handleDisplayDrivers)
 	http.HandleFunc("/api/v1/mapping/", handleMapping)
 	http.HandleFunc("/api/v1/surge_pricing/", handleSurgePricing)
+	http.HandleFunc("/api/v1/start/", handleStart)
 
 	log.Printf("Starting movies microservice on port %d", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))

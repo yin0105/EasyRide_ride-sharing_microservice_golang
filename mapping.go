@@ -111,11 +111,10 @@ func convertKm(d string) (float64, error) {
 
 func handleMapping(w http.ResponseWriter, r *http.Request) {
 	var mapRes MapRes
-	mapRes.ARoad = 0
+	mapRes.ARoad = "0"
 	mapRes.Distance = "0"
 	fmt.Println("Starting Mapping Microservice...")
 	uri := strings.Split(r.URL.Path, "/api/v1/mapping/")
-	fmt.Println(uri[1])
 	// response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=137.750543040919084,%20122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
 	response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&" + uri[1]) //origin=37.75434337954133,%20-122.4837655029297&destination=37.750543040919084,%20-122.41853417968751")
 	// fmt.Println("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&" + uri[1])
@@ -136,8 +135,9 @@ func handleMapping(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Routes == nil")
 		} else {
 			d := result2.Routes[0].Legs[0].Distance.Text
-
-			if totalDistance, err := convertKm(d); err == nil {
+			var totalDistance float64
+			totalDistance, err = convertKm(d)
+			if err == nil {
 				mapRes.Distance = fmt.Sprintf("%.4f", totalDistance)
 			}
 
@@ -160,7 +160,11 @@ func handleMapping(w http.ResponseWriter, r *http.Request) {
 					total2 += stepDistance
 				}
 			}
-			mapRes.ARoad = fmt.Sprintf("%.4f", total2)
+			if total2/totalDistance >= 0.5 {
+				mapRes.ARoad = "1"
+			} else {
+				mapRes.ARoad = "0"
+			}
 
 		}
 
