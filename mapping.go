@@ -14,16 +14,31 @@ type Distance struct {
 	Value string `json:"value"`
 }
 
+type Location struct {
+	Lat float64 `json:"lat"`
+	Lng float64 `json:"lng"`
+}
+
+type Step struct {
+	Distance         Distance    `json:"distance"`
+	Duration         Distance    `json:"distance"`
+	EndLocation      Location    `json:"distance"`
+	HtmlInstructions string      `json:"distance"`
+	Polyline         interface{} `json:"distance"`
+	StartLocation    Location    `json:"distance"`
+	TravelMode       string      `json:"distance"`
+}
+
 type Leg struct {
-	Distance          Distance                 `json:"distance"`
-	Duration          Distance                 `json:"duration"`
-	EndAddress        string                   `json:"end_address"`
-	EndLocation       map[string]string        `json:"end_location"`
-	StartAddress      string                   `json:"start_address"`
-	StartLocation     map[string]string        `json:"start_location"`
-	Steps             []map[string]interface{} `json:"steps"`
-	TrafficSpeedEntry []interface{}            `json:"traffic_speed_entry"`
-	ViaWaypoint       []interface{}            `json:"via_waypoint"`
+	Distance          Distance      `json:"distance"`
+	Duration          Distance      `json:"duration"`
+	EndAddress        string        `json:"end_address"`
+	EndLocation       Location      `json:"end_location"`
+	StartAddress      string        `json:"start_address"`
+	StartLocation     Location      `json:"start_location"`
+	Steps             []Step        `json:"steps"`
+	TrafficSpeedEntry []interface{} `json:"traffic_speed_entry"`
+	ViaWaypoint       []interface{} `json:"via_waypoint"`
 }
 
 type Routes struct {
@@ -47,6 +62,22 @@ type HttpRes struct {
 type MapRes struct {
 	Distance string `json:"distance"`
 	ARoad    int    `json:"a_road"`
+}
+
+func convertKm(d string) (float64, error) {
+	d = strings.TrimSpace(d)
+	unit := string(d[len(d)-2:])
+	d = strings.TrimSpace(d[:len(d)-2])
+	if s, err := strconv.ParseFloat(d, 32); err == nil {
+		if unit == "mi" {
+			s *= 1.609
+		} else if unit == "ft" {
+			s *= 0.0003048
+		}
+		return s, nil
+	} else {
+		return 0, err
+	}
 }
 
 func handleMapping(w http.ResponseWriter, r *http.Request) {
@@ -76,19 +107,9 @@ func handleMapping(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Routes == nil")
 		} else {
 			d := result2.Routes[0].Legs[0].Distance.Text
-			d = strings.TrimSpace(d)
-			unit := string(d[len(d)-2:])
-			d = strings.TrimSpace(d[:len(d)-2])
-			fmt.Println(unit)
-			fmt.Println(d)
-			if s, err := strconv.ParseFloat(d, 32); err == nil {
-				if unit == "mi" {
-					s *= 1.609
-				} else if unit == "ft" {
-					s *= 0.0003048
-				}
-				fmt.Println(s)
-				mapRes.Distance = fmt.Sprintf("%.4f", s)
+
+			if totalDistance, err := convertKm(d); err == nil {
+				mapRes.Distance = fmt.Sprintf("%.4f", totalDistance)
 
 			}
 		}
