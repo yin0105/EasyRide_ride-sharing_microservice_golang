@@ -45,13 +45,13 @@ type HttpRes struct {
 }
 
 type MapRes struct {
-	Distance     string `json:"distance"`
-	PercentARoad string `json:"percent_a_road"`
+	Distance string `json:"distance"`
+	ARoad    int    `json:"a_road"`
 }
 
 func handleMapping(w http.ResponseWriter, r *http.Request) {
 	var mapRes MapRes
-	mapRes.PercentARoad = "0"
+	mapRes.ARoad = 0
 	mapRes.Distance = "0"
 	fmt.Println("Starting Mapping Microservice...")
 	uri := strings.Split(r.URL.Path, "/api/v1/mapping/")
@@ -62,7 +62,6 @@ func handleMapping(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, fmt.Sprintf("The HTTP request failed with error %s\n", err), http.StatusBadRequest)
 		return
-		// fmt.Printf("The HTTP request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 		fmt.Println("data = " + string(data))
