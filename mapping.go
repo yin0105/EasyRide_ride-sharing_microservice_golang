@@ -91,8 +91,10 @@ func convertKm(d string) (float64, error) {
 	d = strings.TrimSpace(d)
 	unit := string(d[len(d)-2:])
 	d = strings.TrimSpace(d[:len(d)-2])
+	d = strings.Replace(d, ",", "", -1)
 	// fmt.Println("##" + d + "##")
 
+	fmt.Println("s = " + d)
 	if s, err := strconv.ParseFloat(d, 64); err == nil {
 		// fmt.Println(unit)
 		// fmt.Println("%.4f", s)
@@ -116,6 +118,7 @@ func handleMapping(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Starting Mapping Microservice...")
 	uri := strings.Split(r.URL.Path, "/api/v1/mapping/")
 	// response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?origin=37.75434337954133,%20-122.4837655029297&destination=137.750543040919084,%20122.41853417968751&key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y")
+	fmt.Println(uri[1])
 	response, err := http.Get("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&" + uri[1]) //origin=37.75434337954133,%20-122.4837655029297&destination=37.750543040919084,%20-122.41853417968751")
 	// fmt.Println("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyDI57hkGB_K7Mtp4eFdYiy0mIw68z_1R1Y&" + uri[1])
 	if err != nil {
